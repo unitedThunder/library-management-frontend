@@ -5,6 +5,7 @@ import ListBookComponent from './component/ListBookComponent';
 import HeaderComponent from './component/HeaderComponent';
 import FooterComponent from './component/FooterComponent';
 import CreateBookComponent from './component/CreateBookComponent';
+import UpdateBookComponent from './component/UpdateBookComponent';
 
 
 function App() {
@@ -16,7 +17,8 @@ function App() {
           <Routes>
             <Route path="/" exact element={<ListBookComponent/>} />
             <Route path="/books" element={<ListBookComponent/>} />
-            <Route path="/addbook" element={<CreateBookComponent/>} />
+            <Route path="/add-book" element={<CreateBookComponent/>} />
+            <Route path="/update-book/:isbn" element={<UpdateBookComponent/>} />
           </Routes>
         </div>
         <FooterComponent />

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import BookService from '../services/BookService';
-
-const CreateBookComponent = () => {
+const UpdateBookComponent = () => {
+    const { isbn } = useParams();
     const [book, setBook] = useState({
         isbn: '',
         bookName: '',
@@ -10,16 +10,36 @@ const CreateBookComponent = () => {
         description: '',
     });
 
+    useEffect(() => {
+        BookService.getBookByIsbn(isbn).then((res) => {
+            setBook(res.data);
+        });
+    }, [isbn]);
+
     const navigate = useNavigate();
 
-    const saveBook = (event) => {
+    const updateBook = (event) => {
         event.preventDefault();
-        console.log('book => ' + JSON.stringify(book));
 
-        BookService.createBook(book).then(res=>{
-            navigate('/books');
-        });
+        // const updatedBook = {
+        //     isbn: isbn,
+        //     bookName: book.bookName,
+        //     serialNumber: book.serialNumber,
+        //     description: book.description,
+        // };
+
+        console.log('Updating book with:', book);
+
+        BookService.updateBook(book, isbn).then((res) => {
+                console.log('Book updated successfully:', res.data);
+                navigate('/books');
+            })
+            .catch((error) => {
+                console.error('Error updating book:', error);
+                // Handle the error, e.g., show a user-friendly message
+            });
     };
+
 
     const cancel = () => {
         navigate('/books');
@@ -27,6 +47,7 @@ const CreateBookComponent = () => {
 
     const handleChange = (event) => {
         const { name, value } = event.target;
+        console.log(`Updating ${name} to: ${value}`);
         setBook((prevBook) => ({ ...prevBook, [name]: value }));
     };
 
@@ -35,13 +56,10 @@ const CreateBookComponent = () => {
             <div className="container">
                 <div className="row">
                     <div className="card col-md-6 offset-md-3 offset-md-3 mt-4">
-                        <h3 className="text-center">Add Book</h3>
+                        <h3 className="text-center">Update Book</h3>
                         <div className="card-body">
                             <form action="">
-                                <div className="form-group">
-                                    <label> ISBN: </label>
-                                    <input placeholder="ISBN" name="isbn" className="form-control" value={book.isbn} onChange={handleChange} />
-                                </div>
+
 
                                 <div className="form-group">
                                     <label> Book Name: </label>
@@ -58,7 +76,7 @@ const CreateBookComponent = () => {
                                     <input placeholder="Description" name="description" className="form-control" value={book.description} onChange={handleChange} />
                                 </div>
 
-                                <button className="btn btn-success mt-3" onClick={saveBook}>Save</button>
+                                <button className="btn btn-success mt-3" onClick={updateBook}>Save</button>
                                 <button className="btn btn-danger mt-3" onClick={cancel} style={{ marginLeft: '10px' }}>Cancel</button>
                             </form>
                         </div>
@@ -69,4 +87,4 @@ const CreateBookComponent = () => {
     );
 };
 
-export default CreateBookComponent;
+export default UpdateBookComponent;

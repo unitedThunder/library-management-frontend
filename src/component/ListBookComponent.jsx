@@ -1,66 +1,71 @@
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import BookService from '../services/BookService';
+import { useParams } from 'react-router-dom';
 
-class ListBookComponent extends Component {
 
-    constructor(props){
-        super(props)
+const ListBookComponent = () => {
+    const { isbn } = useParams();
+    const [books, setBooks] = useState([]);
+    const navigate = useNavigate();
 
-        this.state = {
-            books: []
-        }
-
-        this.addBook=this.addBook.bind(this);
-    }
-
-    componentDidMount(){
-        BookService.getBooks().then((resp) => {
-            this.setState({books: resp.data});
+    useEffect(() => {
+        BookService.getBooks().then((res) => {
+            setBooks(res.data);
         });
-    }
+    }, []);
 
-    addBook(){
-        this.props.history.push('/addbook');
-    }
-    render() {
-        return (
-            <div>
-                <h1 className='text-center'>Book List</h1>
-                <div>
-                    <button className="btn btn-primary" onClick={this.addBook}>Add Employee</button>
-                </div>
-                <div className="row">
-                    <table className="table table-striped table-bordered">
-                        <thead>
-                            <tr>
-                                <th>ISBN</th>
-                                <th>Book Name</th>
-                                <th>Serial Number</th>
-                                <th>Description</th>
-                                <th>Action</th>
+    const deleteBook = (isbn) => {
+        BookService.deleteBook(isbn).then((res) => {
+            setBooks(books.filter(book => book.isbn !== isbn));
+            navigate('/books');
+        });
+    };
+
+
+    return (
+        <div>
+            <h2 className="text-center">Books List</h2>
+
+            <Link to="/add-book" className="btn btn-primary">
+                Add Book
+            </Link>
+
+            <div className="row mt-2">
+                <table className="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>ISBN</th>
+                            <th>Book Name </th>
+                            <th>Serial Number </th>
+                            <th>Description </th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {books.map((book) => (
+                            <tr key={book.isbn}>
+                                <td>{book.isbn}</td>
+                                <td>{book.bookName}</td>
+                                <td>{book.serialNumber}</td>
+                                <td>{book.description}</td>
+                                <td>
+                                    <Link to={`/update-book/${book.isbn}`}>
+                                        <button className='btn btn-info'>Update</button>
+                                    </Link>
+                                    <button style={{ marginLeft: '10px' }} className='btn btn-danger' onClick={() => deleteBook(book.isbn)}>Delete</button>
+
+
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            {
-                                this.state.books.map(
-                                    book =>
-                                    <tr>
-                                        
-                                        <td>{book.isbn}</td>
-                                        <td>{book.bookName}</td>
-                                        <td>{book.serialNumber}</td>
-                                        <td>{book.description}</td>
-
-                                    </tr>
-                                )
-                            }
-                        </tbody>
-                    </table>
-                </div>
-
+                        ))}
+                    </tbody>
+                </table>
             </div>
-        );
-    }
-}
+        </div>
+
+    );
+};
 
 export default ListBookComponent;
